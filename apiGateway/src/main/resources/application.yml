@@ -1,0 +1,41 @@
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:8761/eureka
+  instance:
+    hostname: localhost
+
+
+server:
+  port: 8765
+
+spring:
+  application:
+    name: api-gateway
+  cloud:
+    gateway:
+      routes:
+        - id: product-service
+          uri: lb://product-service  # Ensure this matches the Eureka service name exactly
+          predicates:
+            - Path=/api/products/**  # Route requests with this path to Product Service
+          filters:
+            - AddRequestHeader=X-Request-Foo, Bar
+        - id: auth-service
+          uri: lb://auth-service  # Ensure this matches the Eureka service name exactly
+          predicates:
+            - Path=/admin/**  # Route requests with this path to Product Service
+          filters:
+            - AddRequestHeader=X-Request-Foo, Bar
+
+  main:
+    web-application-type: reactive
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+    endpoint:
+      health:
+        show-details: always
